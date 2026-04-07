@@ -132,12 +132,17 @@ class NabWeatherd(NabInfoService):
     WEATHER_CLASSES = {
         "Eclaircies": ("sunny", SUNNY_INFO_ANIMATION),
         "Peu nuageux": ("sunny", SUNNY_INFO_ANIMATION),
+        "Ciel clair": ("sunny", SUNNY_INFO_ANIMATION),
         "Ensoleillé": ("sunny", SUNNY_INFO_ANIMATION),
         "Ciel voilé": ("cloudy", CLOUDY_INFO_ANIMATION),
         "Ciel voilé nuit": ("cloudy", CLOUDY_INFO_ANIMATION),
         "Très nuageux": ("cloudy", CLOUDY_INFO_ANIMATION),
         "Couvert": ("cloudy", CLOUDY_INFO_ANIMATION),
         "Rares averses": (
+            "rainy",
+            RAINY_INFO_ANIMATION,
+        ),
+        "Averses faibles": (
             "rainy",
             RAINY_INFO_ANIMATION,
         ),
@@ -195,6 +200,14 @@ class NabWeatherd(NabInfoService):
             "snowy",
             SNOWY_INFO_ANIMATION,
         ),
+        "Averses de neige faible": (
+            "snowy",
+            SNOWY_INFO_ANIMATION,
+        ),
+        "Neige faible": (
+            "snowy",
+            SNOWY_INFO_ANIMATION,
+        ),
         "Pluie et neige": (
             "snowy",
             SNOWY_INFO_ANIMATION,
@@ -220,6 +233,10 @@ class NabWeatherd(NabInfoService):
             FOGGY_INFO_ANIMATION,
         ),
         "Brume": (
+            "foggy",
+            FOGGY_INFO_ANIMATION,
+        ),
+        "Brouillard dense": (
             "foggy",
             FOGGY_INFO_ANIMATION,
         ),
@@ -490,8 +507,12 @@ class NabWeatherd(NabInfoService):
                 packet = '{"type":"info",' '"info_id":"nabweatherd_rain"}\r\n'
                 self.writer.write(packet.encode("utf8"))
 
+            weather_class_key = info_data["today_forecast_weather_class"]
+            if weather_class_key is None:
+                logging.warning("get_animation: unknown weather class, skipping")
+                return None
             (weather_class, info_animation) = NabWeatherd.WEATHER_CLASSES[
-                info_data["today_forecast_weather_class"]
+                weather_class_key
             ]
             return info_animation
 
@@ -532,18 +553,31 @@ class NabWeatherd(NabInfoService):
             )
             self.writer.write(packet.encode("utf8"))
         else:
+            weather_class = None
             if type == "today":
-                (weather_class, info_animation) = NabWeatherd.WEATHER_CLASSES[
-                    info_data["today_forecast_weather_class"]
-                ]
+                weather_class_key = info_data["today_forecast_weather_class"]
+                if weather_class_key is not None:
+                    (weather_class, info_animation) = (
+                        NabWeatherd.WEATHER_CLASSES[weather_class_key]
+                    )
                 max_temp = info_data["today_forecast_max_temp"]
             elif type == "tomorrow":
-                (weather_class, info_animation) = NabWeatherd.WEATHER_CLASSES[
-                    info_data["tomorrow_forecast_weather_class"]
+                weather_class_key = info_data[
+                    "tomorrow_forecast_weather_class"
                 ]
+                if weather_class_key is not None:
+                    (weather_class, info_animation) = (
+                        NabWeatherd.WEATHER_CLASSES[weather_class_key]
+                    )
                 max_temp = info_data["tomorrow_forecast_max_temp"]
             else:
                 logging.debug(f"Unknown type {type}")
+                return
+            if weather_class is None:
+                logging.warning(
+                    f"perform_additional: unknown weather class for {type}, "
+                    "skipping voice announcement"
+                )
                 return
             unit_sound_file = "degree.mp3"
             if unit == NabWeatherd.UNIT_FARENHEIT:
