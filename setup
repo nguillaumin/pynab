@@ -113,6 +113,8 @@ then
     rm davesteele-comitup-apt-source_1.2_all.deb
     apt-get update -y --allow-insecure-repositories || true
     apt-get install --no-install-recommends -y --allow-unauthenticated comitup comitup-watch
+    # Remove the comitup apt source to avoid GPG errors in subsequent apt operations
+    rm -f /etc/apt/sources.list.d/davesteele-comitup.list
     rm /etc/network/interfaces
     systemctl mask dnsmasq.service
     systemctl mask systemd-resolved.service
@@ -167,7 +169,7 @@ then
 fi
 
 echo "Installing required packages."
-sudo apt-get update -y --allow-insecure-repositories
+sudo apt-get update -y
 sudo apt-get dist-upgrade -y
 sudo apt-get install --no-install-recommends -y postgresql libpq-dev git python3 python3-venv python3-dev gettext nginx openssl libssl-dev libffi-dev libmpg123-dev libasound2-dev libatlas-base-dev libgfortran5 libopenblas-dev liblapack-dev zram-tools
 sudo apt-get install --no-install-recommends -y gcc make raspberrypi-kernel-headers
