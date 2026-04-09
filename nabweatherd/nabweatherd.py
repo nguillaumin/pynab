@@ -245,6 +245,7 @@ class NabWeatherd(NabInfoService):
         "Orages": ("stormy", STORMY_INFO_ANIMATION),
         "Averses orageuses": ("stormy", STORMY_INFO_ANIMATION),
         "Risque d'orages": ("stormy", STORMY_INFO_ANIMATION),
+        "Orage avec grêle": ("stormy", STORMY_INFO_ANIMATION),
     }
 
     weather_bedtime_done = False
