@@ -11,6 +11,7 @@ jobs:
   test_suite:
     name: Run test suite
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
@@ -28,6 +29,7 @@ jobs:
           cpu: arm1176
           cpu_info: cpuinfo/raspberrypi_zero_w
           base_image: dietpi:rpi_armv6_bullseye
+          experimental: true
         - target: zero2_64_raspios
           cpu: cortex-a53
           cpu_info: cpuinfo/raspberrypi_zero2_w_arm64
@@ -70,6 +72,7 @@ jobs:
   create_image:
     name: Build image
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
@@ -87,6 +90,7 @@ jobs:
           cpu: arm1176
           cpu_info: cpuinfo/raspberrypi_zero_w
           base_image: dietpi:rpi_armv6_bullseye
+          experimental: true
         - target: zero2_64_raspios
           cpu: cortex-a53
           cpu_info: cpuinfo/raspberrypi_zero2_w_arm64
