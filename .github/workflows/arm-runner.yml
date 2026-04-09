@@ -52,8 +52,8 @@ jobs:
             sudo useradd pi || true
             sudo sh -c "[ ! -f /etc/sudoers.d/010_pi-nopasswd ] && usermod -aG sudo pi && echo 'pi ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/010_pi-nopasswd || true"
             sudo chown -hR pi:pi /opt/pynab
-            # Raspbian Buster repos are EOL - redirect to legacy archive
-            sudo sed -i 's|http://raspbian.raspberrypi.org/raspbian|http://legacy.raspbian.org/raspbian|g' /etc/apt/sources.list || true
+            # Raspbian Buster repos are EOL - redirect to legacy archive (only for Buster images)
+            grep -q 'buster' /etc/apt/sources.list && sudo sed -i 's|http://raspbian.raspberrypi.org/raspbian|http://legacy.raspbian.org/raspbian|g' /etc/apt/sources.list || true
             sudo apt-get update -y --allow-releaseinfo-change
             # Prevent service start/reload attempts in chroot (e.g. dbus triggered by avahi-daemon)
             printf '#!/bin/sh\nexit 101\n' | sudo tee /usr/sbin/policy-rc.d && sudo chmod +x /usr/sbin/policy-rc.d
@@ -132,8 +132,8 @@ jobs:
           commands: |
             # Disable IPv6 in case it is configured but does not work
             ping6 -c 1 www.ietf.org || sudo sysctl -w net.ipv6.conf.eth0.disable_ipv6=1
-            # Raspbian Buster repos are EOL - redirect to legacy archive
-            sudo sed -i 's|http://raspbian.raspberrypi.org/raspbian|http://legacy.raspbian.org/raspbian|g' /etc/apt/sources.list || true
+            # Raspbian Buster repos are EOL - redirect to legacy archive (only for Buster images)
+            grep -q 'buster' /etc/apt/sources.list && sudo sed -i 's|http://raspbian.raspberrypi.org/raspbian|http://legacy.raspbian.org/raspbian|g' /etc/apt/sources.list || true
             sudo apt-get update -y --allow-releaseinfo-change
             echo GITHUB_BRANCH=${{ steps.image_and_branch_name.outputs.LOCAL_BRANCH }}
             echo GITHUB_REPOSITORY=${{ github.repository }}
